@@ -1,0 +1,74 @@
+1. Show detalist teams:
+
+
+CREATE table team_statistic AS 
+SELECT 
+team
+,season
+,ROUND(AVG(scored_goals*1.0),2) AS Avg_Goals_Scored
+,ROUND (AVG(conceded_goals*1.0),2) AS Avg_Goals_Conceded
+,SUM(scored_goals) AS Sum_scored_goals
+,SUM(conceded_goals) AS Sum_conceded_goals
+,COUNT (case when scored_goals>conceded_goals THEN 1 END) AS Wins
+,COUNT (case when scored_goals<conceded_goals THEN 1 END) AS Loses
+,COUNT (case when scored_goals=conceded_goals THEN 1 END) AS Draws
+
+,COUNT (*) AS Total_matches
+FROM 
+(
+SELECT 
+home AS team
+,season
+,home_goals AS scored_goals
+,away_goals AS conceded_goals
+from matches 
+UNION ALL
+SELECT
+away AS team
+,season
+,away_goals AS scored_goals
+,home_goals AS conceded_goals
+
+FROM matches 
+) AS union_matches
+GROUP BY team, season
+ORDER BY team
+
+2. How many seasons has each team played?
+
+SELECT team
+,COUNT(season)
+FROM team_statistic
+GROUP BY team
+ORDER BY COUNT(season) DESC
+
+3. In which season did the teams score the most goals?
+
+SELECT team
+,season
+,MAX(sum_scored_goals) as max_goals
+FROM team_statistic
+GROUP BY team,season
+ORDER BY max_goals DESC
+
+4. In which season were the most goals scored?
+
+SELECT 
+season
+,  SUM(sum_scored_goals) as season_goals
+FROM team_statistic
+GROUP BY season
+ORDER BY season_goals DESC
+LIMIT 1
+
+5. Which team had the highest average number of goals scored in which season?
+
+SELECT team
+,season
+,MAX(avg_goals_scored) as max_avg
+
+FROM team_statistic
+GROUP BY team,season
+ORDER BY max_avg DESC
+
+LIMIT 1
